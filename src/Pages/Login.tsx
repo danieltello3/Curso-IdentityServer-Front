@@ -1,7 +1,7 @@
-import React, { useState, type FormEvent } from "react";
+import React, { use, useEffect, useState, type FormEvent } from "react";
 import { tokenService } from "../api/tokenServide";
-import { login } from "../api/authClient";
-import { useNavigate } from "react-router-dom";
+import { login, loginMicrosoft } from "../api/authClient";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 type LoginValues = {
   username: string;
@@ -17,6 +17,9 @@ const Login = () => {
   const [localError, setLocalError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [searchParams] = useSearchParams();
+  const error = searchParams.get("error");
 
   const navigate = useNavigate();
 
@@ -34,6 +37,7 @@ const Login = () => {
       return;
     }
     try {
+      setIsLoading(true);
       const response = await login({
         username: values.username,
         password: values.password,
@@ -43,11 +47,29 @@ const Login = () => {
       // Redirige al dashboard o donde quieras
       navigate("/home");
     } catch (error) {
+      setErrorMessage("Error en login. Por favor, intenta nuevamente.");
       console.error("Error en login:", error);
       // Aquí podrías manejar errores (mostrar mensaje usando props errorMessage, etc.)
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setErrorMessage(null);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, [errorMessage]);
+
+  useEffect(() => {
+    if (error === "external_login_failed") {
+      setErrorMessage(
+        "Error al iniciar sesión con Microsoft. Por favor, intenta nuevamente."
+      );
+    }
+  }, [error]);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-950 to-slate-900 flex items-center justify-center px-4">
@@ -59,9 +81,9 @@ const Login = () => {
       <div className="relative w-full max-w-md">
         <div className="backdrop-blur-xl bg-slate-900/60 border border-white/10 rounded-2xl shadow-2xl shadow-black/40 p-8">
           <div className="flex flex-col items-center gap-2 mb-8">
-            <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white text-2xl font-bold">
+            <div className="p-2 rounded-2xl bg-linear-to-tr from-indigo-500 to-cyan-400 flex items-center justify-center text-white text-2xl font-bold">
               {/* Logo simple */}
-              <span>FS</span>
+              <span>Galaxy</span>
             </div>
             <h1 className="text-2xl font-semibold text-white tracking-tight">
               Bienvenido
@@ -210,6 +232,26 @@ const Login = () => {
               )}
             </button>
           </form>
+          <div className="mt-6 flex items-center gap-3 w-full max-w-md">
+            <div className="h-px flex-1 bg-slate-700" />
+            <span className="text-xs text-slate-400">o continúa con</span>
+            <div className="h-px flex-1 bg-slate-700" />
+          </div>
+
+          {/* Botón Microsoft */}
+          <button
+            type="button"
+            onClick={loginMicrosoft}
+            className="cursor-pointer mt-3 w-full max-w-md inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-medium text-slate-100 border border-slate-700 transition"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#F25022" d="M11 11H4V4h7z" />
+              <path fill="#00A4EF" d="M11 20H4v-7h7z" />
+              <path fill="#7FBA00" d="M20 11h-7V4h7z" />
+              <path fill="#FFB900" d="M20 20h-7v-7h7z" />
+            </svg>
+            <span>Continuar con Microsoft</span>
+          </button>
         </div>
       </div>
     </div>

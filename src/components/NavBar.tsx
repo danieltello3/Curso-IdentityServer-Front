@@ -13,7 +13,7 @@ const NavBar: React.FC = () => {
   return (
     <nav className="bg-slate-900 backdrop-blur-md border-b border-slate-800 px-6 py-4 flex items-center justify-between">
       <div className="text-white font-semibold text-lg tracking-tight">
-        Mi App 🚀
+        🌠 Proyecto Galaxy 
       </div>
 
       <div className="flex items-center gap-4">
@@ -34,7 +34,7 @@ const NavBar: React.FC = () => {
         <button
           type="button"
           onClick={logout}
-          className="text-sm font-medium px-3 py-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-500 transition"
+          className="cursor-pointer text-sm font-medium px-3 py-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-500 transition"
         >
           Cerrar sesión
         </button>

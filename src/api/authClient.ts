@@ -2,8 +2,10 @@
 import axios from "axios";
 import { tokenService } from "./tokenServide";
 
+const baseUrl = import.meta.env.VITE_AUTH_API_URL;
+
 const authClient = axios.create({
-  baseURL: import.meta.env.VITE_AUTH_API_URL,
+  baseURL: baseUrl,
   headers: {
     "Content-Type": "application/x-www-form-urlencoded",
   },
@@ -26,9 +28,7 @@ const CLIENT_SECRET = "secret";
 const SCOPE = "roles profile email";
 const GRANT_TYPE = "password";
 
-export async function login(
-  data: LoginRequest
-): Promise<LoginResponse> {
+export async function login(data: LoginRequest): Promise<LoginResponse> {
   const body = new URLSearchParams();
   body.append("client_id", CLIENT_ID);
   body.append("client_secret", CLIENT_SECRET);
@@ -37,13 +37,18 @@ export async function login(
   body.append("password", data.password);
   body.append("scope", SCOPE);
 
-  const response = await authClient.post<LoginResponse>(
-    "/connect/token",
-    body
-  );
+  const response = await authClient.post<LoginResponse>("/connect/token", body);
 
   return response.data;
 }
+
+export const loginMicrosoft = () => {
+  const returnUrl = "/dashboard";
+  const url = `${baseUrl}/external/login/Microsoft?returnUrl=${encodeURIComponent(
+    returnUrl
+  )}`;
+  window.location.href = url;
+};
 
 export function logout() {
   // Borra el access token almacenado
